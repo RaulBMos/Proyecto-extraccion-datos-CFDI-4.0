@@ -57,3 +57,11 @@ Este proyecto es una aplicación en Python diseñada para extraer información d
 
 *   `pandas`
 *   `openpyxl`
+
+## Nota sobre backups
+
+Durante tareas de limpieza se generó un respaldo del entorno virtual anidado. El archivo de respaldo se encuentra en:
+
+- `proyecto_cfdi/venv_backup.zip`
+
+Puedes eliminarlo manualmente cuando ya no lo necesites.
