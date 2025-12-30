@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd"
+    Version="4.0" Serie="A" Folio="12345" Fecha="2024-08-15T10:30:25" 
+    Sello="Base64String..." NoCertificado="20001000000200000018" 
+    Certificado="Base64String..." SubTotal="1000.00" Moneda="MXN" 
+    Total="1160.00" TipoDeComprobante="I" MetodoPago="PUE" LugarExpedicion="06470">
+
+    <cfdi:Emisor Rfc="DEMO010101001" Nombre="Empresa Demostrativa SA de CV" RegimenFiscal="601"/>
+
+    <cfdi:Receptor Rfc="XAXX010101000" Nombre="Juan Pérez González" RegimenFiscalReceptor="605" 
+        DomicilioFiscalReceptor="06500" UsoCFDI="G03"/>
+
+    <cfdi:Conceptos>
+        <cfdi:Concepto ClaveProdServ="84111506" Cantidad="1.000000" ClaveUnidad="H87" 
+            Unidad="Servicio" Descripcion="Servicio de consultoría en tecnología" 
+            ValorUnitario="1000.00" Importe="1000.00" ObjetoImp="02">
+            
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="1000.00" Impuesto="002" TipoFactor="Tasa" 
+                        TasaOCuota="0.160000" Importe="160.00"/>
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+            
+        </cfdi:Concepto>
+        
+        <cfdi:Concepto ClaveProdServ="50211503" Cantidad="2.000000" ClaveUnidad="H87" 
+            Unidad="Pieza" Descripcion="Licencia de software" 
+            ValorUnitario="500.00" Importe="1000.00" ObjetoImp="02">
+            
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="1000.00" Impuesto="002" TipoFactor="Tasa" 
+                        TasaOCuota="0.160000" Importe="160.00"/>
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+            
+        </cfdi:Concepto>
+    </cfdi:Conceptos>
+
+    <cfdi:Impuestos TotalImpuestosTrasladados="320.00">
+        <cfdi:Traslados>
+            <cfdi:Traslado Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="320.00"/>
+        </cfdi:Traslados>
+    </cfdi:Impuestos>
+
+    <cfdi:Complemento>
+        <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" 
+            xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd"
+            Version="1.1" UUID="A1B2C3D4-E5F6-7890-ABCD-1234567890EF" 
+            FechaTimbrado="2024-08-15T10:30:45" RfcProvCertif="SAT970701NN3" 
+            Leyenda="Este documento es una representación impresa de un CFDI"
+            SelloCFD="Base64String..." NoCertificadoSAT="20001000000300022815" SelloSAT="Base64String..."/>
+            
+        <pago20:Pagos xmlns:pago20="http://www.sat.gob.mx/Pagos20" 
+            xsi:schemaLocation="http://www.sat.gob.mx/Pagos20 http://www.sat.gob.mx/sitio_internet/cfd/Pagos/Pagos20.xsd"
+            Version="2.0">
+            
+            <pago20:Totales TotalRetencionesIVA="0.00" TotalRetencionesISR="0.00" 
+                TotalRetencionesIEPS="0.00" TotalTrasladosBaseIVA16="2000.00" 
+                TotalTrasladosImpuestoIVA16="320.00" TotalTrasladosBaseIVA8="0.00" 
+                TotalTrasladosImpuestoIVA8="0.00" TotalTrasladosBaseIVA0="0.00" 
+                TotalTrasladosImpuestoIVA0="0.00" TotalTrasladosBaseIVAExento="0.00" 
+                MontoTotalPagos="2320.00"/>
+                
+            <pago20:Pago FechaPago="2024-08-15T10:30:25" FormaDePagoP="03" 
+                MonedaP="MXN" TipoCambioP="1" Monto="2320.00">
+                
+                <pago20:DoctoRelacionado IdDocumento="A1B2C3D4-E5F6-7890-ABCD-1234567890EF" 
+                    Serie="A" Folio="12345" MonedaDR="MXN" EquivalenciaDR="1" 
+                    NumParcialidad="1" ImpSaldoAnt="2320.00" ImpPagado="2320.00" 
+                    ImpSaldoInsoluto="0.00" ObjetoImpDR="02">
+                    
+                    <pago20:ImpuestosDR>
+                        <pago20:TrasladosDR>
+                            <pago20:TrasladoDR BaseDR="2000.00" ImpuestoDR="002" 
+                                TipoFactorDR="Tasa" TasaOCuotaDR="0.160000" ImporteDR="320.00"/>
+                        </pago20:TrasladosDR>
+                    </pago20:ImpuestosDR>
+                    
+                </pago20:DoctoRelacionado>
+            </pago20:Pago>
+        </pago20:Pagos>
+    </cfdi:Complemento>
+
+</cfdi:Comprobante>
