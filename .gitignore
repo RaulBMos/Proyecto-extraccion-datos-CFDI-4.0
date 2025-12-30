@@ -1,2 +1,4 @@
 .venv/
 proyecto_cfdi/.git_embedded_backup/
+/.venv/
+proyecto_cfdi/.venv/
