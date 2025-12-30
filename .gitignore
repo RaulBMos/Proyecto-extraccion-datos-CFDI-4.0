@@ -2,3 +2,6 @@
 proyecto_cfdi/.git_embedded_backup/
 /.venv/
 proyecto_cfdi/.venv/
+proyecto_cfdi/venv_backup.zip
+proyecto_cfdi/venv_backup*
+venv_backup.zip
