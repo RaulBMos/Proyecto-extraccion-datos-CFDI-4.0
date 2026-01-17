@@ -37,13 +37,16 @@ def main():
     output_dir = os.path.abspath(os.path.join(script_dir, CARPETA_OUTPUT))
 
     # Validar carpeta de entrada
-    if not os.path.isdir(input_dir):
-        print(f"Error: La carpeta de entrada '{input_dir}' no existe o no es un directorio.")
-        return
+    # Asegurar que la carpeta de entrada exista (en lugar de dar error y salir)
+    if not os.path.exists(input_dir):
+        print(f"ℹ️ La carpeta de entrada no existía. Creándola en: {input_dir}")
+        os.makedirs(input_dir)
+        print("👉 Por favor, coloca tus archivos XML dentro de esa carpeta y vuelve a ejecutar el script.")
+        return # Salimos porque sabemos que la carpeta recién creada está vacía
 
     # Asegurar que la carpeta de salida exista
     if not os.path.exists(output_dir):
-        print(f"La carpeta de salida '{output_dir}' no existe. Creándola...")
+        print(f"ℹ️ Creando carpeta de salida en: {output_dir}")
         os.makedirs(output_dir)
 
     # Buscar archivos XML en la carpeta de entrada (case-insensitive)
