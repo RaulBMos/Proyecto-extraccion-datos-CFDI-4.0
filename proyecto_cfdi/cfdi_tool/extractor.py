@@ -98,8 +98,8 @@ class CFDIExtractor:
             'total': float(root.get('Total', 0)),
             'moneda': root.get('Moneda', 'MXN'),
             'tipo_comprobante': self.traducir_tipo_comprobante(root.get('TipoDeComprobante')),
-            'metodo_pago': root.get('MetodoPago', 'No especificado'),
-            'lugar_expedicion': root.get('LugarExpedicion')
+            'metodo_pago': root.get('MetodoPago', 'Pago parcial'),
+            'lugar_expedicion': root.get('LugarExpedicion', 'SIN_LUGAR')
         }
         return datos
 
@@ -125,7 +125,7 @@ class CFDIExtractor:
             return {
                 'rfc': emisor.get('Rfc'),
                 'nombre': emisor.get('Nombre', 'Sin Nombre'),
-                'regimen_fiscal': emisor.get('RegimenFiscal')
+                'regimen_fiscal': emisor.get('RegimenFiscal'),
             }
         # Devolver estructura consistente aunque falte el emisor
         return {'rfc': None, 'nombre': None, 'regimen_fiscal': None}
@@ -142,9 +142,10 @@ class CFDIExtractor:
                 'nombre': receptor.get('Nombre', 'Sin Nombre'),
                 'uso_cfdi': receptor.get('UsoCFDI'),
                 'regimen_fiscal': receptor.get('RegimenFiscalReceptor'),
-                'domicilio_fiscal': receptor.get('DomicilioFiscalReceptor')
+                'domicilio_fiscal': receptor.get('DomicilioFiscalReceptor'),
+                'domicilio_fiscal_receptor': receptor.get('DomicilioFiscalReceptor')
             }
-        return {}
+        return {'rfc': None, 'nombre': None, 'uso_cfdi': None, 'regimen_fiscal': None, 'domicilio_fiscal': None, 'domicilio_fiscal_receptor': None }
 
     def extraer_conceptos(self, root):
         """Extrae la lista de conceptos y normaliza tipos numéricos.

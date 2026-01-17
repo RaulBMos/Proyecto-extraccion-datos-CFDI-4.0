@@ -42,6 +42,7 @@ def exportar_a_excel(lista_datos_cfdi, ruta_salida):
         # Obtener el primer concepto si existe (para la descripción en la hoja general)
         conceptos = datos.get('conceptos', [])
         primer_concepto = conceptos[0] if conceptos else {}
+        traslados = datos.get('impuestos', {}).get('traslados', [])
 
         # Construir fila para la hoja general con campos comunes
         fila_gen = {
@@ -52,17 +53,19 @@ def exportar_a_excel(lista_datos_cfdi, ruta_salida):
             'Serie': datos.get('datos_generales', {}).get('serie'),
             'Folio': datos.get('datos_generales', {}).get('folio'),
             'Subtotal': datos.get('datos_generales', {}).get('subtotal'),
-            'tasa_cuota': datos.get('impuestos', {}).get('tasa_cuota'),
-            'importe': datos.get('impuestos', {}).get('importe'),
+            'tasa_cuota': traslados[0].get('tasa_cuota') if traslados else 'SIN_TASA', 
+            'importe': traslados[0].get('importe') if traslados else 'SIN_IMPORTE',
             'Total': datos.get('datos_generales', {}).get('total'),
             'Moneda': datos.get('datos_generales', {}).get('moneda'),
+            'Descripcion': primer_concepto.get('descripcion'),
             'Emisor RFC': datos.get('emisor', {}).get('rfc'),
             'Emisor Nombre': datos.get('emisor', {}).get('nombre'),
             'Receptor RFC': datos.get('receptor', {}).get('rfc'),
             'Receptor Nombre': datos.get('receptor', {}).get('nombre'),
             'Uso CFDI': datos.get('receptor', {}).get('uso_cfdi'),
             'RegimenFiscalReceptor': datos.get('receptor', {}).get('regimen_fiscal'),
-            'Descripcion': primer_concepto.get('descripcion'),
+            'lugar_expedicion': datos.get('datos_generales', {}).get('lugar_expedicion'),
+            'receptor_domicilio_fiscal_receptor': datos.get('receptor', {}).get('domicilio_fiscal_receptor'),
         }
         filas_general.append(fila_gen)
 
@@ -71,12 +74,12 @@ def exportar_a_excel(lista_datos_cfdi, ruta_salida):
             fila_con = {
                 'UUID_CFDI': uuid,  # para relacionar con la hoja general
                 'ClaveProdServ': concepto.get('clave_prod_serv'),
+                'Descripcion': concepto.get('descripcion'),
                 'Cantidad': concepto.get('cantidad'),
                 'ClaveUnidad': concepto.get('clave_unidad'),
-                'Descripcion': concepto.get('descripcion'),
                 'ValorUnitario': concepto.get('valor_unitario'),
                 'Importe': concepto.get('importe'),
-                'Descuento': concepto.get('descuento')
+                'Descuento': concepto.get('descuento'),
             }
             filas_conceptos.append(fila_con)
 
