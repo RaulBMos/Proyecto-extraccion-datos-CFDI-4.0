@@ -255,16 +255,39 @@ class CFDIExtractor:
                 docs = pago.findall('.//pago10:DoctoRelacionado', self.namespaces)
 
             for doc in docs:
-                pago_data['documentos_relacionados'].append({
+            # Extraer información de impuestos trasladados (TrasladoDR)
+                traslados_dr = []
+                impuestos_dr = doc.find('.//pago20:ImpuestosDR', self.namespaces)
+                if impuestos_dr is None:
+                    impuestos_dr = doc.find('.//pago10:ImpuestosDR', self.namespaces)
+                
+                if impuestos_dr is not None:
+                    traslados = impuestos_dr.findall('.//pago20:TrasladoDR', self.namespaces)
+                    if not traslados:
+                        traslados = impuestos_dr.findall('.//pago10:TrasladoDR', self.namespaces)
+                    
+                    for traslado in traslados:
+                        traslados_dr.append({
+                            'base': float(traslado.get('BaseDR', 0)),
+                            'impuesto': traslado.get('ImpuestoDR'),
+                            'tipo_factor': traslado.get('TipoFactorDR'),
+                            'tasa_cuota': float(traslado.get('TasaOCuotaDR', 0)),
+                            'importe': float(traslado.get('ImporteDR', 0))
+                        })
+                
+                # Construir el diccionario del documento relacionado
+                doc_relacionado = {
                     'id_documento': doc.get('IdDocumento'),
                     'serie': doc.get('Serie'),
                     'folio': doc.get('Folio'),
                     'moneda': doc.get('MonedaDR'),
                     'imp_saldo_ant': float(doc.get('ImpSaldoAnt', 0)),
                     'imp_pagado': float(doc.get('ImpPagado', 0)),
-                    'imp_saldo_insoluto': float(doc.get('ImpSaldoInsoluto', 0))
-                })
-
+                    'imp_saldo_insoluto': float(doc.get('ImpSaldoInsoluto', 0)),
+                    'traslados_dr': traslados_dr
+                }
+                
+                pago_data['documentos_relacionados'].append(doc_relacionado)
             datos_pagos.append(pago_data)
 
         return datos_pagos
@@ -286,7 +309,8 @@ class CFDIExtractor:
             'receptor': self.extraer_receptor(root),
             'conceptos': self.extraer_conceptos(root),
             'timbre': self.extraer_timbre(root),
-            'complementos': self.extraer_complementos(root)
+            'complementos': self.extraer_complementos(root),
+            'impuestos': self.extraer_impuestos_concepto(root),
         }
 
         # Mostrar un resumen amigable en consola

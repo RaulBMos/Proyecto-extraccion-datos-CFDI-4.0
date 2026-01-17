@@ -38,23 +38,31 @@ def exportar_a_excel(lista_datos_cfdi, ruta_salida):
     for datos in lista_datos_cfdi:
         # Obtener UUID del timbre si está disponible, si no usar un valor por defecto
         uuid = datos.get('timbre', {}).get('uuid', 'SIN_UUID')
+        
+        # Obtener el primer concepto si existe (para la descripción en la hoja general)
+        conceptos = datos.get('conceptos', [])
+        primer_concepto = conceptos[0] if conceptos else {}
 
         # Construir fila para la hoja general con campos comunes
         fila_gen = {
             'UUID': uuid,
-            'Archivo': datos.get('archivo'),
             'Fecha': datos.get('datos_generales', {}).get('fecha'),
             'Tipo Comprobante': datos.get('datos_generales', {}).get('tipo_comprobante'),
+            'Metodo de Pago': datos.get('datos_generales', {}).get('metodo_pago'),
             'Serie': datos.get('datos_generales', {}).get('serie'),
             'Folio': datos.get('datos_generales', {}).get('folio'),
             'Subtotal': datos.get('datos_generales', {}).get('subtotal'),
+            'tasa_cuota': datos.get('impuestos', {}).get('tasa_cuota'),
+            'importe': datos.get('impuestos', {}).get('importe'),
             'Total': datos.get('datos_generales', {}).get('total'),
             'Moneda': datos.get('datos_generales', {}).get('moneda'),
             'Emisor RFC': datos.get('emisor', {}).get('rfc'),
             'Emisor Nombre': datos.get('emisor', {}).get('nombre'),
             'Receptor RFC': datos.get('receptor', {}).get('rfc'),
             'Receptor Nombre': datos.get('receptor', {}).get('nombre'),
-            'Uso CFDI': datos.get('receptor', {}).get('uso_cfdi')
+            'Uso CFDI': datos.get('receptor', {}).get('uso_cfdi'),
+            'RegimenFiscalReceptor': datos.get('receptor', {}).get('regimen_fiscal'),
+            'Descripcion': primer_concepto.get('descripcion'),
         }
         filas_general.append(fila_gen)
 
@@ -79,6 +87,10 @@ def exportar_a_excel(lista_datos_cfdi, ruta_salida):
                 # El pago puede tener su propio UUID o usar el del CFDI
                 uuid_pago = pago.get('uuid', uuid)
                 for doc_rel in pago.get('documentos_relacionados', []):
+                    # Extraer el primer traslado si existe (puede haber múltiples)
+                    traslados = doc_rel.get('traslados_dr', [])
+                    primer_traslado = traslados[0] if traslados else {}
+                    
                     fila_doc_rel = {
                         'UUID_CFDI': uuid,  # UUID del CFDI principal
                         'UUID_Pago': uuid_pago,  # UUID del pago si aplica
@@ -88,7 +100,12 @@ def exportar_a_excel(lista_datos_cfdi, ruta_salida):
                         'MonedaDR': doc_rel.get('moneda'),
                         'ImpSaldoAnt': doc_rel.get('imp_saldo_ant'),
                         'ImpPagado': doc_rel.get('imp_pagado'),
-                        'ImpSaldoInsoluto': doc_rel.get('imp_saldo_insoluto')
+                        'ImpSaldoInsoluto': doc_rel.get('imp_saldo_insoluto'),
+                        'BaseDR': primer_traslado.get('base'),
+                        #'ImpuestoDR': primer_traslado.get('impuesto'),
+                        #'TipoFactorDR': primer_traslado.get('tipo_factor'),
+                        'TasaOCuotaDR': primer_traslado.get('tasa_cuota'),
+                        'ImporteDR': primer_traslado.get('importe')
                     }
                     filas_documentos_relacionados.append(fila_doc_rel)
 
