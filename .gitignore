@@ -1,7 +1,19 @@
+# Entorno virtual y dependencias
 .venv/
-proyecto_cfdi/.git_embedded_backup/
-/.venv/
-proyecto_cfdi/.venv/
-proyecto_cfdi/venv_backup.zip
-proyecto_cfdi/venv_backup*
+venv/
+env/
 venv_backup.zip
+
+# Caché de Python y herramientas
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Datos del proyecto (Carpetas de entrada y salida)
+# Ignoramos estas carpetas para no subir facturas o resultados a GitHub
+input_cfdi/
+output_excel/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
