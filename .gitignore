@@ -11,8 +11,8 @@ __pycache__/
 
 # Datos del proyecto (Carpetas de entrada y salida)
 # Ignoramos estas carpetas para no subir facturas o resultados a GitHub
-input_cfdi/
-output_excel/
+proyecto_cfdi/input_cfdi/
+proyecto_cfdi/output_excel/
 
 # Archivos del sistema
 .DS_Store
