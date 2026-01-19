@@ -22,20 +22,23 @@ class CFDIProcessorApp:
     def __init__(self, page: ft.Page):
         self.page = page
         
+        # Variables de estado
         self.carpeta_input: Optional[str] = None
         self.carpeta_output: Optional[str] = None
         self.extractor = CFDIExtractor()
         
+        # Componentes UI
         self.txt_input = ft.TextField(
             label="Ruta de la carpeta con archivos XML",
-            hint_text=r"Escribe o pega la ruta",
+            hint_text=r"Ejemplo: C:\Users\tu_usuario\Documents\xmls",
             on_change=self.on_input_changed,
             expand=True
+            
         )
         
         self.txt_output = ft.TextField(
             label="Ruta de la carpeta de salida",
-            hint_text=r"Escribe o pega la ruta",
+            hint_text=r"Ejemplo: C:\Users\tu_usuario\Documents\salida",
             on_change=self.on_output_changed,
             expand=True
         )
@@ -43,93 +46,86 @@ class CFDIProcessorApp:
         self.btn_procesar = ft.Button(
             "🚀 Iniciar Procesamiento",
             on_click=self.process_files,
-            disabled=True
+            disabled=True,
+            style=ft.ButtonStyle(
+                color="white",
+                bgcolor={ft.ControlState.DISABLED: "grey", "": "blue"},
+                padding=20,
+            ),
+            width=300,
+            height=50
         )
         
-        # Botones de examinar
-        print("🔧 Creando botones Examinar...")
-        self.btn_examinar_input = ft.Button(
-            "📁 Examinar",
-            on_click=self.open_input_picker
-        )
-        print(f"   btn_examinar_input: {self.btn_examinar_input}")
-        
-        self.btn_examinar_output = ft.Button(
-            "📂 Examinar",
-            on_click=self.open_output_picker
-        )
-        print(f"   btn_examinar_output: {self.btn_examinar_output}")
-        
-        self.progress_bar = ft.ProgressBar(visible=False)
-        self.txt_status = ft.Text("", visible=False)
+        self.progress_bar = ft.ProgressBar(width=500, visible=False, color="blue")
+        self.txt_status = ft.Text("", visible=False, size=14, color="grey")
         self.container_resultado = ft.Container(visible=False)
         
-        # FilePickers
-        print("🔧 Creando FilePickers...")
-        self.pick_input_folder = ft.FilePicker()
-        self.pick_input_folder.on_result = self.on_select_input
-        
-        self.pick_output_folder = ft.FilePicker()
-        self.pick_output_folder.on_result = self.on_select_output
-        
+        # Configurar página
         self.page.title = "Procesador CFDI → Excel"
         self.page.window_width = 900
         self.page.window_height = 700
         self.page.padding = 40
-        
-        # Agregar FilePickers al overlay
-        self.page.overlay.extend([self.pick_input_folder, self.pick_output_folder])
-        print(f"✅ Inicialización completa")
+        self.page.theme_mode = ft.ThemeMode.LIGHT
 
     def build_ui(self):
-        print("🏗️ Construyendo UI...")
+        """Construye la interfaz completa."""
         return ft.Column(
             controls=[
-                ft.Text("Procesador de Facturas CFDI", size=32, weight=ft.FontWeight.BOLD),
-                ft.Text("Convierte archivos XML CFDI a formato Excel", size=16),
+                ft.Text(
+                    "Procesador de Facturas CFDI", 
+                    size=32, 
+                    weight=ft.FontWeight.BOLD, 
+                    color="blue"
+                ),
+                ft.Text(
+                    "Convierte archivos XML CFDI a formato Excel",
+                    size=16,
+                    color="grey"
+                ),
                 ft.Divider(height=30),
                 
+                # Input Section
                 ft.Text("📁 Carpeta de Entrada", size=18, weight=ft.FontWeight.BOLD),
-                ft.Row(
-                    controls=[
-                        self.txt_input,
-                        self.btn_examinar_input
-                    ],
-                    spacing=10
-                ),
+                self.txt_input,
                 
                 ft.Divider(height=20),
                 
+                # Output Section
                 ft.Text("💾 Carpeta de Salida", size=18, weight=ft.FontWeight.BOLD),
-                ft.Row(
-                    controls=[
-                        self.txt_output,
-                        self.btn_examinar_output
-                    ],
-                    spacing=10
-                ),
+                self.txt_output,
                 
                 ft.Divider(height=40),
                 
-                ft.Row([self.btn_procesar], alignment=ft.MainAxisAlignment.CENTER),
+                # Process Button
+                ft.Row(
+                    controls=[self.btn_procesar],
+                    alignment=ft.MainAxisAlignment.CENTER
+                ),
                 
                 ft.Divider(height=30),
                 
+                # Progress Area
                 ft.Column(
-                    [self.txt_status, self.progress_bar],
+                    controls=[
+                        self.txt_status,
+                        self.progress_bar
+                    ],
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     spacing=10
                 ),
                 
                 ft.Divider(height=20),
-                self.container_resultado,
+                
+                # Results Area
+                self.container_resultado
             ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=10
+            scroll=ft.ScrollMode.AUTO,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER
         )
 
     def on_input_changed(self, e):
-        ruta = e.control.value.strip().strip('"').strip("'")
+        """Cuando el usuario escribe la ruta de entrada."""
+        ruta = e.control.value.strip().strip('"')  # Quitar comillas si las pega
         
         if not ruta:
             self.carpeta_input = None
@@ -145,22 +141,23 @@ class CFDIProcessorApp:
                 if archivos:
                     self.carpeta_input = ruta
                     e.control.error_text = None
-                    e.control.helper_text = f"✅ {len(archivos)} archivos XML"
+                    e.control.helper_text = f"✅ {len(archivos)} archivos XML encontrados"
                 else:
                     self.carpeta_input = None
-                    e.control.error_text = "⚠️ No hay archivos XML"
+                    e.control.error_text = "⚠️ No se encontraron archivos XML en esta carpeta"
             except Exception as ex:
                 self.carpeta_input = None
                 e.control.error_text = f"❌ Error: {str(ex)}"
         else:
             self.carpeta_input = None
-            e.control.error_text = "❌ Carpeta no existe"
+            e.control.error_text = "❌ La carpeta no existe o no es válida"
         
         self.check_enable_process_button()
         self.page.update()
 
     def on_output_changed(self, e):
-        ruta = e.control.value.strip().strip('"').strip("'")
+        """Cuando el usuario escribe la ruta de salida."""
+        ruta = e.control.value.strip().strip('"')
         
         if not ruta:
             self.carpeta_output = None
@@ -173,7 +170,7 @@ class CFDIProcessorApp:
         try:
             if not os.path.exists(ruta):
                 os.makedirs(ruta)
-                e.control.helper_text = "✅ Carpeta creada"
+                e.control.helper_text = "✅ Carpeta creada correctamente"
                 e.control.error_text = None
             else:
                 e.control.helper_text = "✅ Carpeta válida"
@@ -187,79 +184,23 @@ class CFDIProcessorApp:
         self.check_enable_process_button()
         self.page.update()
 
-    def on_select_input(self, e):
-        """Handler cuando se selecciona carpeta de entrada."""
-        print("=" * 60)
-        print("📥 on_select_input LLAMADO")
-        print(f"   Tipo de e: {type(e)}")
-        print(f"   Tiene path: {hasattr(e, 'path')}")
-        if hasattr(e, 'path'):
-            print(f"   e.path = {e.path}")
-            self.txt_input.value = e.path
-            
-            class MockEvent:
-                def __init__(self, control):
-                    self.control = control
-            
-            self.on_input_changed(MockEvent(self.txt_input))
-            self.page.update()
-            print("   ✅ Ruta actualizada")
-        else:
-            print("   ❌ No tiene path - usuario canceló")
-        print("=" * 60)
-
-    def on_select_output(self, e):
-        """Handler cuando se selecciona carpeta de salida."""
-        print("=" * 60)
-        print("📥 on_select_output LLAMADO")
-        print(f"   Tipo de e: {type(e)}")
-        print(f"   Tiene path: {hasattr(e, 'path')}")
-        if hasattr(e, 'path'):
-            print(f"   e.path = {e.path}")
-            self.txt_output.value = e.path
-            
-            class MockEvent:
-                def __init__(self, control):
-                    self.control = control
-            
-            self.on_output_changed(MockEvent(self.txt_output))
-            self.page.update()
-            print("   ✅ Ruta actualizada")
-        else:
-            print("   ❌ No tiene path - usuario canceló")
-        print("=" * 60)
-
-    async def open_input_picker(self, e):
-        """Abre el selector de carpeta de entrada."""
-        try:
-            await self.pick_input_folder.get_directory_path(
-                dialog_title="Seleccione carpeta con XMLs"
-            )
-        except Exception as ex:
-            print(f"Error input picker: {ex}")
-
-    async def open_output_picker(self, e):
-        """Abre el selector de carpeta de salida."""
-        try:
-            await self.pick_output_folder.get_directory_path(
-                dialog_title="Seleccione carpeta de salida"
-            )
-        except Exception as ex:
-            print(f"Error output picker: {ex}")
-
     def check_enable_process_button(self):
+        """Habilita botón si ambas carpetas están seleccionadas."""
         self.btn_procesar.disabled = not (self.carpeta_input and self.carpeta_output)
 
     async def process_files(self, e):
+        """Procesa archivos XML de forma asíncrona."""
+        # Preparar UI
         self.btn_procesar.disabled = True
         self.progress_bar.visible = True
         self.progress_bar.value = None
         self.txt_status.visible = True
         self.container_resultado.visible = False
         self.txt_status.value = "Iniciando procesamiento..."
-        self.page.update()
+        await self.page.update_async()
         
         try:
+            # Obtener archivos
             archivos_xml = [f for f in os.listdir(self.carpeta_input) 
                            if f.lower().endswith('.xml')]
             total_archivos = len(archivos_xml)
@@ -271,10 +212,11 @@ class CFDIProcessorApp:
             todos_los_datos = []
             errores = 0
             
+            # Procesar cada archivo
             for i, nombre_archivo in enumerate(archivos_xml):
                 self.txt_status.value = f"Procesando: {nombre_archivo}\n({i+1} de {total_archivos})"
                 self.progress_bar.value = (i + 1) / total_archivos
-                self.page.update()
+                await self.page.update_async()
                 
                 ruta_completa = os.path.join(self.carpeta_input, nombre_archivo)
                 
@@ -293,75 +235,95 @@ class CFDIProcessorApp:
                 
                 await asyncio.sleep(0.01)
 
+            # Generar Excel
             self.progress_bar.value = 1.0
-            self.txt_status.value = "Generando Excel..."
-            self.page.update()
+            self.txt_status.value = "Generando archivo Excel..."
+            await self.page.update_async()
             
             if not todos_los_datos:
-                await self.show_error("No se extrajeron datos válidos.")
+                await self.show_error("No se extrajeron datos válidos de ningún CFDI.")
                 return
 
             nombre_excel = "reporte_cfdi.xlsx"
             ruta_salida_excel = os.path.join(self.carpeta_output, nombre_excel)
             
             if exportar_a_excel is None:
-                raise ImportError("No se pudo importar exportar_a_excel.")
+                raise ImportError("No se pudo importar exportar_a_excel. Verifique que pandas y openpyxl estén instalados.")
 
             await asyncio.to_thread(exportar_a_excel, todos_los_datos, ruta_salida_excel)
             
+            # Mostrar éxito
             await self.show_success(len(todos_los_datos), errores, nombre_excel)
             
         except Exception as ex:
-            await self.show_error(f"Error:\n{str(ex)}")
+            await self.show_error(f"Error inesperado:\n{str(ex)}")
         finally:
             self.btn_procesar.disabled = False
-            self.page.update()
+            await self.page.update_async()
 
     async def show_success(self, procesados, errores, nombre_excel):
+        """Muestra mensaje de éxito."""
         self.txt_status.value = "✅ Proceso Finalizado"
         self.progress_bar.visible = False
         
         self.container_resultado.content = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("✅ Completado", size=24, weight=ft.FontWeight.BOLD),
+                    ft.Text(
+                        "✅ Procesamiento Completado",
+                        size=24,
+                        weight=ft.FontWeight.BOLD,
+                        color="green"
+                    ),
                     ft.Divider(height=20),
-                    ft.Text(f"📄 Archivo: {nombre_excel}"),
-                    ft.Text(f"📊 Procesados: {procesados}"),
-                    ft.Text(f"⚠️ Errores: {errores}"),
+                    ft.Text(f"📄 Archivo generado: {nombre_excel}", size=16),
+                    ft.Text(f"📊 Archivos procesados: {procesados}", size=16),
+                    ft.Text(
+                        f"⚠️ Archivos con errores: {errores}", 
+                        size=16,
+                        color="red" if errores > 0 else "black"
+                    ),
                     ft.Divider(height=20),
-                    ft.Button("📂 Abrir carpeta", on_click=self.open_output_folder)
+                    ft.Button(
+                        "📂 Abrir carpeta de resultados",
+                        on_click=self.open_output_folder,
+                        height=45
+                    )
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=10
             ),
             padding=30,
+            border=ft.border.all(2, "green"),
             border_radius=10
         )
         self.container_resultado.visible = True
-        self.page.update()
+        await self.page.update_async()
 
     async def show_error(self, mensaje):
+        """Muestra mensaje de error."""
         self.txt_status.value = "❌ Error"
         self.progress_bar.visible = False
         
         self.container_resultado.content = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("❌ Error", size=24, weight=ft.FontWeight.BOLD),
+                    ft.Text("❌ Error", size=24, color="red", weight=ft.FontWeight.BOLD),
                     ft.Divider(height=10),
-                    ft.Text(mensaje, size=14)
+                    ft.Text(mensaje, size=14, color="red")
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=10
             ),
             padding=30,
+            border=ft.border.all(2, "red"),
             border_radius=10
         )
         self.container_resultado.visible = True
-        self.page.update()
+        await self.page.update_async()
 
     def open_output_folder(self, e):
+        """Abre carpeta de salida."""
         try:
             if not os.path.exists(self.carpeta_output):
                 return
@@ -374,25 +336,16 @@ class CFDIProcessorApp:
             else:
                 subprocess.run(['xdg-open', self.carpeta_output])
         except Exception as ex:
-            print(f"Error: {ex}")
+            print(f"Error al abrir carpeta: {ex}")
 
 
-async def main(page: ft.Page):
-    print("📱 main() ejecutándose...")
+def main(page: ft.Page):
+    """Punto de entrada."""
     app = CFDIProcessorApp(page)
-    
-    # Agregar UI primero
     page.add(app.build_ui())
-    
-    # Asegurar que FilePickers estén en overlay
-    if app.pick_input_folder not in page.overlay:
-        page.overlay.append(app.pick_input_folder)
-    if app.pick_output_folder not in page.overlay:
-        page.overlay.append(app.pick_output_folder)
-        
     page.update()
-    print("✅ Aplicación iniciada (Async)")
+
 
 if __name__ == "__main__":
     print("🚀 Iniciando Procesador CFDI")
-    ft.app(main)
+    ft.run(main)
