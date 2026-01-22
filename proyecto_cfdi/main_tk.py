@@ -8,6 +8,14 @@ import subprocess
 import platform
 from typing import Optional
 
+# --- Ventana de carga ---
+loading = tk.Tk()
+loading.title("Iniciando...")
+loading.geometry("300x100")
+loading.resizable(False, False)
+ttk.Label(loading, text="Cargando aplicación...", font=("Arial", 12)).pack(pady=20)
+loading.update()  # ¡Importante! Fuerza a que se muestre ahora
+
 # Importar lógica de negocio existente
 try:
     from cfdi_tool.extractor import CFDIExtractor

@@ -13,6 +13,8 @@ __pycache__/
 # Ignoramos estas carpetas para no subir facturas o resultados a GitHub
 proyecto_cfdi/input_cfdi/
 proyecto_cfdi/output_excel/
+dist/
+build/
 
 # Archivos del sistema
 .DS_Store
